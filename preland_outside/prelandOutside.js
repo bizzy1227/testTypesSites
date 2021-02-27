@@ -1,7 +1,4 @@
-const {Builder, By, Key, until} = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-let opts = new chrome.Options();
-const CONSTS = require('../consts');
+const { By } = require('selenium-webdriver');
 
 let capabilities = false;
 let driver;
@@ -12,19 +9,11 @@ let prelandOutsideResult = {
 };
 
 const handlePrelandOutside = async function(optinos) {
-    capabilities = optinos.cp;
-    
+    console.log('in handle preland outside');
 
-    if (capabilities) {
-        driver = await new Builder().usingServer('http://hub-cloud.browserstack.com/wd/hub')
-        .withCapabilities(capabilities).setChromeOptions(new chrome.Options().addArguments(['--ignore-certificate-errors', '--ignore-ssl-errors', '--headless']))
-        .build();
-    } else {
-        opts.addArguments(['--ignore-certificate-errors', '--ignore-ssl-errors'])
-        driver = await new Builder().forBrowser('chrome')
-        .setChromeOptions(opts)
-        .build();
-    }
+    capabilities = optinos.capabilities;
+    driver = optinos.driver;
+
 
     try {    
         optinos.inputURL = await setTestQueryParams(optinos.inputURL);
@@ -42,13 +31,11 @@ const handlePrelandOutside = async function(optinos) {
 
         console.log('end test', prelandOutsideResult);
 
-        driver.quit();
-
         return prelandOutsideResult;
 
     } catch (error) {
-        driver.quit();
-        prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  href, capabilities: capabilities, URL: inputURL.href} };
+        console.log(error);
+        prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  error.message, capabilities: capabilities, URL: optinos.inputURL.href} };
         return prelandOutsideResult;
     }
 }
@@ -71,15 +58,6 @@ const clickLink = async function(driver, inputURL) {
     let href = await link.getAttribute('href');
     let testNodeUrl = new URL(href);
     if (testNodeUrl.protocol === 'chrome-error:') {
-        if (writeLogsForm) {
-            logger.log({
-                level: 'error',
-                message: href,
-                URL: inputURL.href,
-                capabilities: capabilities
-            });
-        }
-        driver.quit();
         prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  href, capabilities: capabilities, URL: inputURL.href} };
         return prelandOutsideResult;
     }
@@ -122,12 +100,24 @@ async function setTestQueryParams(inputURL) {
 
 async function checkRelink(driver, relink) {
     let testURL = new URL(await driver.getCurrentUrl());
-    if (relink === testURL.origin + testURL.pathname) {
-        return true;
+    if (relink.startsWith('http')) {
+        let nodeRelinkURL = new URL(relink);
+        if (nodeRelinkURL.origin === testURL.origin) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
-    else {
-        return false;
+    if (relink.startsWith('/')) {
+        if (relink === testURL.pathname) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
+
 }
 
 async function checkYandex(driver, yandex) {
