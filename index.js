@@ -1,30 +1,15 @@
 const fs = require("fs");
 
-const sendModule = require('./send_form/send_module_3');
+// const sendModule = require('./send_form/send_module_3');
 // const webErrorsModule = require('./web_errors/web_errors_module');
-const lighthouseModule = require('./lighthouse/lighthouse_module');
-const selfUpdateModule = require('./self_update/self_update_module');
-const checkJsonModule = require('./check_json/check_json_module');
+// const lighthouseModule = require('./lighthouse/lighthouse_module');
+// const selfUpdateModule = require('./self_update/self_update_module');
+// const checkJsonModule = require('./check_json/check_json_module');
 const deviceSettings = require('./devices');
 const parseNeogara = require('./parsers/neogaraParser');
-const checkLighthouse = require('./lighthouse/lighthouse_module');
+// const checkLighthouse = require('./lighthouse/lighthouse_module');
 const CONSTS = require('./consts');
-const countries = ['PL', 'UA', 'US', 'RU', 'EN', 'GR', 'GB', 'HR', 'HU', 'HK', 'PH', 'ZA', 'IT', 'ES', 'FR', 'NL', 'CH', 'CA', 'CZ', 'SK', 'KR', 'SI', 'SG', 'DE', 'TR', 'AE', 'IS', 'AU', 'BE', 'GB', 'HK', 'FI', 'NL', 'NO', 'NZ', 'CH', 'CA', 'SE', 'DK', 'DE', 'AU', 'AT', 'IE'];
-
-let myArgs = String(process.argv.slice(2));
-myArgs = myArgs.split(',');
-
-// проверка установлен ли флаг на работу с thanks.php
-let processThanksPage = false;
-if (myArgs.includes('--with-thanks')) processThanksPage = true;
-
-// проверка установлен ли флаг на быструю работу
-let fastMode = false;
-if (myArgs.includes('--fast')) fastMode = true;
-
-// первый параметр должен быть код страны для проверки
-let testCountry = false;
-if (countries.includes(myArgs[0])) testCountry = myArgs[0];
+const handlerSwitch = require('./siteHandlerSwitch')
 
 let startDate;
 let sendFormErrors = [];
@@ -47,6 +32,10 @@ const runServer = async function(sites, typeRun) {
 
     let mainRespone = {};
 
+    sites = [
+      'bavnoklpdpl.info'
+    ]
+
 
     console.log('server side sites', sites);
 
@@ -61,7 +50,7 @@ const runServer = async function(sites, typeRun) {
       // результаты обработок
       let selfUpdateResult = null;
       let checkJsonResult;
-      let sendFormResult = [];
+      let testResult = [];
       let lighthouseResult;
 
 
@@ -76,45 +65,50 @@ const runServer = async function(sites, typeRun) {
       // selfUpdateResult = await selfUpdateModule.selfUpdate(nodeUrl.href, false);
   
       // проверка settings.json на каждом сайте
-      checkJsonResult = await checkJsonModule.checkJson(nodeUrl.href, false);
-      let relink;
-      if (!checkJsonResult.hasError) {
-        relink = checkJsonResult.result;
-        checkJsonResult = true;
-      } else {
-        checkJsonResult = checkJsonResult.result;
-      }
+      // checkJsonResult = await checkJsonModule.checkJson(nodeUrl.href, false);
+      // let relink;
+      // if (!checkJsonResult.hasError) {
+      //   relink = checkJsonResult.result;
+      //   checkJsonResult = true;
+      // } else {
+      //   checkJsonResult = checkJsonResult.result;
+      // }
 
       // проверка lighthouse на каждом сайте
-      lighthouseResult = await checkLighthouse.checkLighthouse(nodeUrl.href, false);
+      // lighthouseResult = await checkLighthouse.checkLighthouse(nodeUrl.href, false);
   
       // запуск для теста формы для разных девайсов c browserstack
+      let options = {
+        inputURL: nodeUrl,
+        email: await getEmail('sendFormErrors'),
+        device: false,
+        typeSite: 'land'
+      }
       for (let device of deviceSettings.DEVICES) {
-        sendFormResult.push(await sendModule.checkSend(nodeUrl, false, device, false, false, false, await getEmail(typeRun)));
+        options.device = device;
+        testResult.push(await handlerSwitch.switcher(options));
       }
   
       // перезаписываю nodeUrl на relink, если илд будет отправлен с другого url
-      if (relink) {
-        console.log('nodeUrl it needed', nodeUrl);
-        if (relink.startsWith('/')) relink = nodeUrl.origin + relink
-        nodeUrl = new URL(relink);
-      } 
+      // if (relink) {
+      //   console.log('nodeUrl it needed', nodeUrl);
+      //   if (relink.startsWith('/')) relink = nodeUrl.origin + relink
+      //   nodeUrl = new URL(relink);
+      // } 
       // создаю массив коректных урлов 
       updatedSiteQuery.push(nodeUrl.href);
 
       mainRespone[nodeUrl.href] = {
         selfUpdateResult: selfUpdateResult,
         checkJsonResult: checkJsonResult,
-        sendFormResult: sendFormResult,
+        testResult: testResult,
         lighthouseResult: lighthouseResult,
         neogaraResults: true
       }
   
     }
 
-    // console.log('1 selfUpdateResult', selfUpdateResult, '2 checkJsonResult', checkJsonResult, '3 sendFormResult', sendFormResult);
-
-    let neogaraRes = await checkNeogara(startDate, await getEmail(typeRun));
+    let neogaraRes = await checkNeogara(startDate, await getEmail('sendFormErrors'));
     if (Object.keys(lastResultObj).length !== 0) {
       for (let key in lastResultObj) {
         if (neogaraRes === 'neogara is empty') mainRespone[key].neogaraResults = neogaraRes;
@@ -126,6 +120,8 @@ const runServer = async function(sites, typeRun) {
     console.log('log response mainRespone', JSON.stringify(mainRespone));
     return mainRespone;
 }
+
+runServer();
 
 const runServerWebErrors = async function(sites, typeRun) {
   // обновляем при каждом запросе данные

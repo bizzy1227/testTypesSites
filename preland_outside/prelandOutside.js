@@ -3,6 +3,8 @@ const { By } = require('selenium-webdriver');
 let capabilities = false;
 let driver;
 let prelandOutsideResult = {
+    device: false,
+    browser: false,
     relink: false,
     yandex: false,
     error: false
@@ -24,6 +26,10 @@ const handlePrelandOutside = async function(optinos) {
         await clickLink(driver, optinos.inputURL);
 
         console.log(new URL(await driver.getCurrentUrl()));
+
+        prelandOutsideResult.device = await getDeviceName('device');
+        
+        prelandOutsideResult.browser = await getDeviceName('browser'),
 
         prelandOutsideResult.relink = await checkRelink(driver, optinos.relink);
 

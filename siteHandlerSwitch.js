@@ -7,18 +7,17 @@ const PrelandOutside = require('./preland_outside/prelandOutside');
 const Land = require('./land/land');
 const deviceSettings = require('./devices');
 
-const switcher = async function(inputURL, typeSite = 'prelandWithLand', capabilities = false) {
-    inputURL = await new URL('https://powblzaslwflzkzis.info/');
+const switcher = async function(optionsSwitcher) {
 
     let driver;
-
-    let jsonData = await SaveJson.saveJson(inputURL.href);
+    console.log('optionsSwitcher', optionsSwitcher)
+    let jsonData = await SaveJson.saveJson(optionsSwitcher.inputURL.href);
 
     try {
         
-        if (capabilities) {
+        if (optionsSwitcher.device) {
             driver = await new Builder().usingServer('http://hub-cloud.browserstack.com/wd/hub')
-            .withCapabilities(capabilities).setChromeOptions(new chrome.Options().addArguments(['--ignore-certificate-errors', '--ignore-ssl-errors', '--headless']))
+            .withCapabilities(optionsSwitcher.device).setChromeOptions(new chrome.Options().addArguments(['--ignore-certificate-errors', '--ignore-ssl-errors', '--headless']))
             .build();
         } else {
             opts.addArguments(['--ignore-certificate-errors', '--ignore-ssl-errors'])
@@ -29,25 +28,25 @@ const switcher = async function(inputURL, typeSite = 'prelandWithLand', capabili
 
         let options = {
             driver: driver,
-            inputURL: inputURL,
-            capabilities: capabilities,
+            inputURL: optionsSwitcher.inputURL,
+            capabilities: optionsSwitcher.device,
             relink: jsonData.jsonData.relink,
             yandex: jsonData.jsonData.yandex
         }
 
-        if (typeSite === 'prelandOutside') {
+        if (optionsSwitcher.typeSite === 'prelandOutside') {
             console.log('in prelandOutside');
             let resultTest = await PrelandOutside.handlePrelandOutside(options);
             console.log('resultTest', resultTest);
             return resultTest;
         }
-        if (typeSite === 'land') {
+        if (optionsSwitcher.typeSite === 'land') {
             console.log('in land');
             let resultTest = await Land.handleLand(options);
             console.log('resultTest', resultTest);
             return resultTest;
         }
-        if (typeSite === 'prelandWithLand') {
+        if (optionsSwitcher.typeSite === 'prelandWithLand') {
             console.log('in prelandWithLand');
             let resultTest = {
                 preland: false,
@@ -69,4 +68,4 @@ const switcher = async function(inputURL, typeSite = 'prelandWithLand', capabili
 
 }
 
-switcher();
+module.exports.switcher = switcher;
