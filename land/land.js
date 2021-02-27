@@ -8,7 +8,7 @@ let landResult = {
     error: false
 };
 let countRedirect = 0;
-let usageEmail = 'testmail11@gmail.com';
+let usageEmail = false;
 
 
 const handleLand = async function(options) {
@@ -16,6 +16,7 @@ const handleLand = async function(options) {
 
     capabilities = options.capabilities;
     driver = options.driver;
+    usageEmail = options.email;
 
     try {
         options.inputURL = await setTestQueryParams(options.inputURL);
@@ -70,7 +71,7 @@ async function checkForm(driver, inputURL) {
         await fillForm(driver, inputURL, form);
     } else {
         console.log('page without form');
-        landResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error: 'page without form', capabilities: capabilities, URL: inputURL.href} };
+        landResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: { error: 'page without form', capabilities: capabilities, URL: inputURL.href} };
         return landResult;
     }
 }

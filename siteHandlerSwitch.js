@@ -29,6 +29,7 @@ const switcher = async function(optionsSwitcher) {
         let options = {
             driver: driver,
             inputURL: optionsSwitcher.inputURL,
+            email: optionsSwitcher.email,
             capabilities: optionsSwitcher.device,
             relink: jsonData.jsonData.relink,
             yandex: jsonData.jsonData.yandex
