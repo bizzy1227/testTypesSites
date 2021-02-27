@@ -42,10 +42,14 @@ const handlePrelandOutside = async function(optinos) {
 
         console.log('end test', prelandOutsideResult);
 
+        driver.quit();
+
         return prelandOutsideResult;
 
     } catch (error) {
-        console.log(error)
+        driver.quit();
+        prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  href, capabilities: capabilities, URL: inputURL.href} };
+        return prelandOutsideResult;
     }
 }
 
