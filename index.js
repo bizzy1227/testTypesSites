@@ -33,7 +33,7 @@ const runServer = async function(sites, typeRun) {
     let mainRespone = {};
 
     sites = [
-      'bavnoklpdpl.info'
+      'powelzgamlzfzezis.info/b.php'
     ]
 
 
@@ -79,14 +79,15 @@ const runServer = async function(sites, typeRun) {
   
       // запуск для теста формы для разных девайсов c browserstack
       let options = {
-        inputURL: nodeUrl,
+        inputURL: nodeUrl.href,
         email: await getEmail('sendFormErrors'),
         device: false,
-        typeSite: 'land'
+        typeSite: 'prelandWithLand'
       }
       for (let device of deviceSettings.DEVICES) {
         options.device = device;
         testResult.push(await handlerSwitch.switcher(options));
+        console.log('testResult after cycle iteration', testResult);
       }
   
       // перезаписываю nodeUrl на relink, если илд будет отправлен с другого url

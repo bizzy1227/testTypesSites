@@ -25,7 +25,7 @@ const handlePrelandOutside = async function(optinos) {
 
         await clickLink(driver, optinos.inputURL);
 
-        console.log(new URL(await driver.getCurrentUrl()));
+        // console.log(new URL(await driver.getCurrentUrl()));
 
         prelandOutsideResult.device = await getDeviceName('device');
         
@@ -35,7 +35,7 @@ const handlePrelandOutside = async function(optinos) {
 
         prelandOutsideResult.yandex = await checkYandex(driver, optinos.yandex);
 
-        console.log('end test', prelandOutsideResult);
+        // console.log('end test', prelandOutsideResult);
 
         return prelandOutsideResult;
 

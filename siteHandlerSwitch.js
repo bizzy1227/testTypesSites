@@ -10,8 +10,8 @@ const deviceSettings = require('./devices');
 const switcher = async function(optionsSwitcher) {
 
     let driver;
-    console.log('optionsSwitcher', optionsSwitcher)
-    let jsonData = await SaveJson.saveJson(optionsSwitcher.inputURL.href);
+    // console.log('optionsSwitcher', optionsSwitcher)
+    let jsonData = await SaveJson.saveJson(optionsSwitcher.inputURL);
 
     try {
         
@@ -28,7 +28,7 @@ const switcher = async function(optionsSwitcher) {
 
         let options = {
             driver: driver,
-            inputURL: optionsSwitcher.inputURL,
+            inputURL: new URL(optionsSwitcher.inputURL),
             email: optionsSwitcher.email,
             capabilities: optionsSwitcher.device,
             relink: jsonData.jsonData.relink,
@@ -56,9 +56,9 @@ const switcher = async function(optionsSwitcher) {
             resultTest.preland = await PrelandOutside.handlePrelandOutside(options);
             // если локально расположен ленд - добавляем к урлу релинк в pathname
             options.inputURL.pathname = options.relink;
-            console.log('options', options);
+            // console.log('options', options);
             resultTest.land = await Land.handleLand(options);
-            console.log('resultTest', resultTest);
+            console.log('from return with switcher resultTest', resultTest);
             return resultTest;
         }
     } catch (error) {

@@ -22,7 +22,7 @@ const saveJson  = async function(inputURL) {
         let jsonData = JSON.parse(await elements[0].getText());
         resultSaveJson.jsonData = jsonData;
 
-        console.log('resultSaveJson', resultSaveJson);
+        // console.log('resultSaveJson', resultSaveJson);
 
         return resultSaveJson;
 
