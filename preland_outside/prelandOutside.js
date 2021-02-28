@@ -13,6 +13,14 @@ let prelandOutsideResult = {
 const handlePrelandOutside = async function(optinos) {
     console.log('in handle preland outside');
 
+    prelandOutsideResult = {
+        device: false,
+        browser: false,
+        relink: false,
+        yandex: false,
+        error: false
+    };
+
     capabilities = optinos.capabilities;
     driver = optinos.driver;
 
@@ -47,30 +55,38 @@ const handlePrelandOutside = async function(optinos) {
 }
 
 const clickLink = async function(driver, inputURL) {
-    let link;
+    try {
+        let link;
 
-    console.log('in block clickLink');
-
-    let links = await driver.findElements(By.xpath('//a'));
-
-    // взять ссылку которую видно
-    for(i of links) {
-        if (await i.isDisplayed() === true) {
-            link = i;
-            break;
+        console.log('in block clickLink');
+    
+        let links = await driver.findElements(By.xpath('//a'));
+    
+        // взять ссылку которую видно
+        for(i of links) {
+            if (await i.isDisplayed() === true) {
+                link = i;
+                break;
+            }
+            else continue;
+        };        
+        let href = await link.getAttribute('href');
+        let testNodeUrl = new URL(href);
+        if (testNodeUrl.protocol === 'chrome-error:') {
+            prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  href, capabilities: capabilities, URL: inputURL.href} };
+            return prelandOutsideResult;
         }
-        else continue;
-    };        
-    let href = await link.getAttribute('href');
-    let testNodeUrl = new URL(href);
-    if (testNodeUrl.protocol === 'chrome-error:') {
-        prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  href, capabilities: capabilities, URL: inputURL.href} };
+    
+        await link.click();
+    
+        await driver.sleep(5000);
+
+    } catch (error) {
+        console.log(error);
+        prelandOutsideResult.error = { device: await getDeviceName('device'), browser: await getDeviceName('browser'), result: {error:  'clickLink failed', capabilities: capabilities, URL: inputURL.href} };
         return prelandOutsideResult;
     }
 
-    await link.click();
-
-    await driver.sleep(5000);
 }
 
 async function getDeviceName(requestField) {

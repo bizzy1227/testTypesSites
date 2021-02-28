@@ -32,9 +32,6 @@ const runServer = async function(sites, typeRun) {
 
     let mainRespone = {};
 
-    sites = [
-      'powelzgamlzfzezis.info/b.php'
-    ]
 
 
     console.log('server side sites', sites);
@@ -47,10 +44,11 @@ const runServer = async function(sites, typeRun) {
     additionalСhecks += deviceSettings.DEVICES.length;
 
     for (let i of sites) {
+      console.log('in loop for', i);
       // результаты обработок
       let selfUpdateResult = null;
       let checkJsonResult;
-      let testResult = [];
+      const testResult = [];
       let lighthouseResult;
 
 
@@ -84,11 +82,13 @@ const runServer = async function(sites, typeRun) {
         device: false,
         typeSite: 'prelandWithLand'
       }
-      for (let device of deviceSettings.DEVICES) {
+
+      for (const device of deviceSettings.DEVICES) {
         options.device = device;
         testResult.push(await handlerSwitch.switcher(options));
-        console.log('testResult after cycle iteration', testResult);
       }
+
+      console.log('testResult after loop', testResult)    
   
       // перезаписываю nodeUrl на relink, если илд будет отправлен с другого url
       // if (relink) {
@@ -122,7 +122,9 @@ const runServer = async function(sites, typeRun) {
     return mainRespone;
 }
 
-runServer();
+runServer([
+  'powblzaslwflzkzis.info/b.php'
+]);
 
 const runServerWebErrors = async function(sites, typeRun) {
   // обновляем при каждом запросе данные

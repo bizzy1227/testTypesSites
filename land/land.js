@@ -14,6 +14,11 @@ let usageEmail = false;
 const handleLand = async function(options) {
     console.log('in handle land');
 
+    landResult = {
+        thanks: false,
+        error: false
+    };
+
     capabilities = options.capabilities;
     driver = options.driver;
     usageEmail = options.email;

@@ -8,6 +8,7 @@ const Land = require('./land/land');
 const deviceSettings = require('./devices');
 
 const switcher = async function(optionsSwitcher) {
+    console.log('in switcher');
 
     let driver;
     // console.log('optionsSwitcher', optionsSwitcher)
@@ -37,7 +38,7 @@ const switcher = async function(optionsSwitcher) {
 
         if (optionsSwitcher.typeSite === 'prelandOutside') {
             console.log('in prelandOutside');
-            let resultTest = await PrelandOutside.handlePrelandOutside(options);
+            const resultTest = await PrelandOutside.handlePrelandOutside(options);
             console.log('resultTest', resultTest);
             return resultTest;
         }
